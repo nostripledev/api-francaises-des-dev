@@ -1,1 +1,1 @@
-from .members import Member, MemberOut, MemberIn
+from .members import Member, MemberOut, MemberIn, GetMembers
