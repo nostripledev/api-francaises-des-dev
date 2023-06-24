@@ -5,7 +5,6 @@ from datetime import datetime
 
 
 class MemberIn(BaseModel):
-    id: int
     username: str
     firstname: str
     lastname: str
@@ -15,6 +14,7 @@ class MemberIn(BaseModel):
 
 
 class MemberOut(MemberIn):
+    id: str
     date_activated: Optional[datetime] = None
 
 

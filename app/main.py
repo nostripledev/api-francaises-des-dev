@@ -1,6 +1,6 @@
 from typing import List
 
-from app.lib.sql import get_members, get_member_by_id
+from app.lib.sql import get_members, get_member_by_id, post_member
 
 from fastapi import FastAPI, Response
 from app.models import Member, MemberIn, MemberOut, GetMembers
@@ -22,5 +22,8 @@ def api_get_member_by_id(id: int):
 
 
 @app.post("/members", response_model=MemberOut)
-def post_member(member: MemberIn):
-    return MemberOut(**member.dict())
+def api_post_member(member: MemberIn):
+    result = post_member(member)
+    if result is not None:
+        return Response(status_code=400)
+    return Response(status_code=201)

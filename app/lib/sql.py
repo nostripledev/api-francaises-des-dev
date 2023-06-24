@@ -36,3 +36,17 @@ def get_member_by_id(id_member):
         return None
     member = member_record._make(result)
     return MemberIn(id=member.id, username=member.username, firstname=member.firstname, lastname=member.lastname, description=member.description, mail=member.mail, url_portfolio=member.url_portfolio)
+
+
+def post_member(member: MemberIn):
+    cursor = mydb.cursor()
+    sql = "INSERT INTO member (username, firstname, lastname, description, mail, url_portfolio) VALUES (%s, %s, %s, %s, %s, %s)"
+    val = (member.username, member.firstname, member.lastname, member.description, member.mail, member.url_portfolio)
+    try:
+        cursor.execute(sql, val)
+        mydb.commit()
+    except mysql.connector.Error as exc:
+        print(exc)
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
