@@ -4,6 +4,10 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
+class MemberById(BaseModel):
+    id: int
+
+
 class MemberIn(BaseModel):
     username: str
     firstname: str

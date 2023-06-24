@@ -1,9 +1,10 @@
 from typing import List
 
 from app.lib.sql import get_members, get_member_by_id, post_member
+from app.lib.sql import  get_categories, post_category, get_members_category
 
 from fastapi import FastAPI, Response
-from app.models import Member, MemberIn, MemberOut, GetMembers
+from app.models import MemberIn, MemberOut, GetMembers, Category, CategoryOut
 
 app = FastAPI()
 
@@ -27,3 +28,24 @@ def api_post_member(member: MemberIn):
     if result is not None:
         return Response(status_code=400)
     return Response(status_code=201)
+
+
+@app.get("/categories", response_model=List[Category])
+def api_get_categories():
+    return get_categories()
+
+
+@app.post("/categories")
+def api_post_category(category: CategoryOut):
+    result = post_category(category)
+    if result is not None:
+        return Response(status_code=400)
+    return Response(status_code=201)
+
+
+@app.get("/members/category={name:str}")
+def api_get_members_category(name: str):
+    member = get_members_category(name)
+    if member is None:
+        return Response(status_code=404)
+    return member
