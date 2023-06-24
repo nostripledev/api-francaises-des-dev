@@ -49,4 +49,3 @@ def api_get_members_category(name: str):
     if member is None:
         return Response(status_code=404)
     return member
-

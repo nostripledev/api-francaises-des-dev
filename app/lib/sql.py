@@ -16,8 +16,9 @@ mydb = mysql.connector.connect(
 def get_members():
     cursor = mydb.cursor()
     cursor.execute("SELECT member.id, member.username, member.url_portfolio, member.date_validate, "
-                   "member.date_deleted, category.name FROM member, member_has_category, category WHERE "
-                   "member.id=member_has_category.id_member AND member_has_category.id_category=category.id")
+                   "member.date_deleted, GROUP_CONCAT(category.name) FROM member, member_has_category, category WHERE "
+                   "member.id=member_has_category.id_member AND member_has_category.id_category=category.id GROUP BY "
+                   "member.id")
     result = cursor.fetchall()
     member_record = namedtuple("Member", ["id", "username", "url_portfolio", "date_validate", "date_deleted", "name"])
     cursor.close()
