@@ -1,5 +1,5 @@
 from collections import namedtuple
-from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory
+from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn
 
 from app import settings
 import mysql.connector
@@ -49,8 +49,7 @@ def post_member(member: MemberIn):
     try:
         cursor.execute(sql, val)
         mydb.commit()
-    except mysql.connector.Error as exc:
-        print(exc)
+    except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."
     cursor.close()
     return None
@@ -74,7 +73,6 @@ def post_category(category: CategoryOut):
         cursor.execute(sql, val)
         mydb.commit()
     except mysql.connector.Error as exc:
-        print(exc)
         return "ErrorSQL: the request was unsuccessful..."
     cursor.close()
     return None
@@ -91,3 +89,28 @@ def get_members_category(name_category: str):
     return [GetMembers(id=member.id, username=member.username, url_portfolio=member.url_portfolio) for member in
             map(member_record._make, result)
             if member.date_validate is not None and member.date_deleted is None]
+
+
+def return_id_category_by_name(name: str):
+    cursor = mydb.cursor()
+    sql = "SELECT id FROM category WHERE name = %(name)s"
+    try:
+        cursor.execute(sql, {"name": name})
+        result = cursor.fetchone()
+        return result[0]
+    except TypeError:
+        return "ErrorSQL : the request was unsuccessful"
+
+
+def post_add_category_on_member(member: MemberHasCategoryIn):
+    cursor = mydb.cursor()
+    sql = "INSERT INTO member_has_category (id_member, id_category) SELECT %s, %s FROM DUAL WHERE NOT EXISTS (SELECT " \
+          "1 FROM member_has_category WHERE id_member = %s AND id_category = %s);"
+    id_category = return_id_category_by_name(member.name)
+    try:
+        cursor.execute(sql, (member.id_member, id_category, member.id_member, id_category))
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
