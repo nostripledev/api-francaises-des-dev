@@ -4,12 +4,12 @@ from app.lib.sql import get_members, get_member_by_id, post_member
 from app.lib.sql import  get_categories, post_category, get_members_category
 
 from fastapi import FastAPI, Response
-from app.models import MemberIn, MemberOut, GetMembers, Category, CategoryOut
+from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory
 
 app = FastAPI()
 
 
-@app.get("/members", response_model=List[GetMembers])
+@app.get("/members", response_model=List[MemberWithCategory])
 def api_get_members():
     return get_members()
 
@@ -49,3 +49,4 @@ def api_get_members_category(name: str):
     if member is None:
         return Response(status_code=404)
     return member
+

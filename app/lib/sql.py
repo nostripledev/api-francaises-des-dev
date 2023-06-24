@@ -1,5 +1,5 @@
 from collections import namedtuple
-from app.models import GetMembers, MemberIn, Category, CategoryOut
+from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory
 
 from app import settings
 import mysql.connector
@@ -15,11 +15,13 @@ mydb = mysql.connector.connect(
 
 def get_members():
     cursor = mydb.cursor()
-    cursor.execute("SELECT id, username, url_portfolio, date_validate, date_deleted FROM member")
+    cursor.execute("SELECT member.id, member.username, member.url_portfolio, member.date_validate, "
+                   "member.date_deleted, category.name FROM member, member_has_category, category WHERE "
+                   "member.id=member_has_category.id_member AND member_has_category.id_category=category.id")
     result = cursor.fetchall()
-    member_record = namedtuple("Member", ["id", "username", "url_portfolio", "date_validate", "date_deleted"])
+    member_record = namedtuple("Member", ["id", "username", "url_portfolio", "date_validate", "date_deleted", "name"])
     cursor.close()
-    return [GetMembers(id=member.id, username=member.username, url_portfolio=member.url_portfolio) for member in map(member_record._make, result)
+    return [MemberWithCategory(id_member=member.id, username=member.username, url_portfolio=member.url_portfolio, category_name=member.name) for member in map(member_record._make, result)
             if member.date_validate is not None and member.date_deleted is None]
 
 
