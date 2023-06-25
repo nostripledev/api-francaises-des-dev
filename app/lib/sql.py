@@ -1,5 +1,6 @@
 from collections import namedtuple
-from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn
+from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
+    GetMemberHasNetwork, MemberById, Network, MemberHasNetwork
 
 from app import settings
 import mysql.connector
@@ -22,7 +23,8 @@ def get_members():
     result = cursor.fetchall()
     member_record = namedtuple("Member", ["id", "username", "url_portfolio", "date_validate", "date_deleted", "name"])
     cursor.close()
-    return [MemberWithCategory(id_member=member.id, username=member.username, url_portfolio=member.url_portfolio, category_name=member.name) for member in map(member_record._make, result)
+    return [MemberWithCategory(id_member=member.id, username=member.username, url_portfolio=member.url_portfolio,
+                               category_name=member.name) for member in map(member_record._make, result)
             if member.date_validate is not None and member.date_deleted is None]
 
 
@@ -38,7 +40,8 @@ def get_member_by_id(id_member):
     if result is None:
         return None
     member = member_record._make(result)
-    return MemberIn(id=member.id, username=member.username, firstname=member.firstname, lastname=member.lastname, description=member.description, mail=member.mail, url_portfolio=member.url_portfolio)
+    return MemberIn(id=member.id, username=member.username, firstname=member.firstname, lastname=member.lastname,
+                    description=member.description, mail=member.mail, url_portfolio=member.url_portfolio)
 
 
 def post_member(member: MemberIn):
@@ -84,7 +87,9 @@ def get_members_category(name_category: str):
           "AND member_has_category.id_category = category.id AND category.name = %(name)s"
     cursor.execute(sql, {"name": name_category})
     result = cursor.fetchall()
-    member_record = namedtuple("Member", ["id", "username", "lastname", "firstname", "description", "mail", "date_validate", "date_deleted", "url_portfolio"])
+    member_record = namedtuple("Member",
+                               ["id", "username", "lastname", "firstname", "description", "mail", "date_validate",
+                                "date_deleted", "url_portfolio"])
     cursor.close()
     return [GetMembers(id=member.id, username=member.username, url_portfolio=member.url_portfolio) for member in
             map(member_record._make, result)
@@ -109,6 +114,51 @@ def post_add_category_on_member(member: MemberHasCategoryIn):
     id_category = return_id_category_by_name(member.name)
     try:
         cursor.execute(sql, (member.id_member, id_category, member.id_member, id_category))
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
+
+
+def get_network_of_member_by_id(id_member: int):
+    cursor = mydb.cursor()
+    sql = "SELECT network.name, member_has_network.url FROM network, member_has_network, member WHERE member.id = " \
+          "member_has_network.id_member AND member_has_network.id_network = network.id AND member.id = %(id)s"
+    cursor.execute(sql, {'id': id_member})
+    result = cursor.fetchall()
+    network_record = namedtuple("Network", ["name", "url"])
+    cursor.close()
+    return [GetMemberHasNetwork(name=network.name, url=network.url) for network in map(network_record._make, result)]
+
+
+def get_category_of_member_by_id(id_member: MemberById):
+    cursor = mydb.cursor()
+    sql = "SELECT category.name FROM category, member, member_has_category WHERE member.id = " \
+          "member_has_category.id_member AND member_has_category.id_category = category.id AND member.id = %(id)s"
+    cursor.execute(sql, {'id': id_member.id})
+    result = cursor.fetchall()
+    category_record = namedtuple("Category", ["name"])
+    cursor.close()
+    return [CategoryOut(name=category.name) for category in map(category_record._make, result)]
+
+
+def get_network():
+    cursor = mydb.cursor()
+    sql = "SELECT * FROM network"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    network_record = namedtuple("Network", ["id", "name"])
+    cursor.close()
+    return [Network(id=network.id, name=network.name) for network in map(network_record._make, result)]
+
+
+def post_network_on_member(member: MemberHasNetwork):
+    cursor = mydb.cursor()
+    sql = "INSERT INTO member_has_network (id_member, id_network, url) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE " \
+          "url = %s"
+    try:
+        cursor.execute(sql, (member.id_member, member.id_network, member.url, member.url))
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."

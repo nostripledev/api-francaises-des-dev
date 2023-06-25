@@ -1,10 +1,11 @@
 from typing import List
 
 from app.lib.sql import get_members, get_member_by_id, post_member
-from app.lib.sql import  get_categories, post_category, get_members_category, post_add_category_on_member
+from app.lib.sql import  get_categories, post_category, get_members_category, post_add_category_on_member, get_category_of_member_by_id
+from app.lib.sql import get_network_of_member_by_id , get_network, post_network_on_member
 
 from fastapi import FastAPI, Response
-from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn
+from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, GetMemberHasNetwork, MemberById, Network, MemberHasNetwork
 
 app = FastAPI()
 
@@ -55,5 +56,28 @@ def api_get_members_category(name: str):
 def api_post_add_category_on_member(member: MemberHasCategoryIn):
     category = post_add_category_on_member(member)
     if category is not None:
+        return Response(status_code=400)
+    return Response(status_code=201)
+
+
+@app.get("/network", response_model=List[Network])
+def api_get_network():
+    return get_network()
+
+
+@app.get("/members/network", response_model=List[GetMemberHasNetwork])
+def api_get_network_of_member(id_member: int):
+    return get_network_of_member_by_id(id_member)
+
+
+@app.get("/members/list_category", response_model=List[CategoryOut])
+def api_get_category_of_member_by_id(member: MemberById):
+    return get_category_of_member_by_id(member)
+
+
+@app.post("/members/network")
+def api_post_network_on_member(member: MemberHasNetwork):
+    network = post_network_on_member(member)
+    if network is not None:
         return Response(status_code=400)
     return Response(status_code=201)
