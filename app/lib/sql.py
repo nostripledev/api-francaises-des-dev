@@ -1,6 +1,6 @@
 from collections import namedtuple
 from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
-    GetMemberHasNetwork, MemberById, Network, MemberHasNetwork
+    GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut
 
 from app import settings
 import mysql.connector
@@ -49,6 +49,20 @@ def post_member(member: MemberIn):
     sql = "INSERT INTO member (username, firstname, lastname, description, mail, url_portfolio) VALUES (%s, %s, %s, " \
           "%s, %s, %s)"
     val = (member.username, member.firstname, member.lastname, member.description, member.mail, member.url_portfolio)
+    try:
+        cursor.execute(sql, val)
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
+
+
+def patch_member_update(member: MemberOut):
+    cursor = mydb.cursor()
+    sql = "UPDATE member SET username = %s, firstname = %s, lastname = %s, description = %s, mail = %s, url_portfolio " \
+          "= %s WHERE id = %s"
+    val = (member.username, member.firstname, member.lastname, member.description, member.mail, member.url_portfolio, member.id)
     try:
         cursor.execute(sql, val)
         mydb.commit()
@@ -162,5 +176,29 @@ def post_network_on_member(member: MemberHasNetwork):
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
+
+
+def delete_category_delete_by_member(member: MemberHasCategory):
+    cursor = mydb.cursor()
+    sql = "DELETE FROM member_has_category WHERE id_member = %s AND id_category = %s"
+    try:
+        cursor.execute(sql, (member.id_member, member.id_category))
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
+
+
+def delete_network_delete_by_member(member: MemberHasNetworkIn):
+    cursor = mydb.cursor()
+    sql = "DELETE FROM member_has_network WHERE id_member = %s AND id_network = %s"
+    try:
+        cursor.execute(sql, (member.id_member, member.id_network))
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL : the request was unsuccessful..."
     cursor.close()
     return None

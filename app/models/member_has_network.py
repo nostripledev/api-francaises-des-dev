@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 
 
-class MemberHasNetwork(BaseModel):
+class MemberHasNetworkIn(BaseModel):
     id_member: int
     id_network: int
+
+
+class MemberHasNetwork(MemberHasNetworkIn):
     url: str
 
 

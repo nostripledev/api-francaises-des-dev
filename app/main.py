@@ -1,11 +1,11 @@
 from typing import List
 
-from app.lib.sql import get_members, get_member_by_id, post_member
-from app.lib.sql import  get_categories, post_category, get_members_category, post_add_category_on_member, get_category_of_member_by_id
-from app.lib.sql import get_network_of_member_by_id , get_network, post_network_on_member
+from app.lib.sql import get_members, get_member_by_id, post_member, patch_member_update
+from app.lib.sql import  get_categories, post_category, get_members_category, post_add_category_on_member, get_category_of_member_by_id, delete_category_delete_by_member
+from app.lib.sql import get_network_of_member_by_id , get_network, post_network_on_member, delete_network_delete_by_member
 
 from fastapi import FastAPI, Response
-from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, GetMemberHasNetwork, MemberById, Network, MemberHasNetwork
+from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
 
 app = FastAPI()
 
@@ -26,6 +26,14 @@ def api_get_member_by_id(id: int):
 @app.post("/members", response_model=MemberOut)
 def api_post_member(member: MemberIn):
     result = post_member(member)
+    if result is not None:
+        return Response(status_code=400)
+    return Response(status_code=200)
+
+
+@app.patch("/members/update")
+def api_patch_member_update(member: MemberOut):
+    result = patch_member_update(member)
     if result is not None:
         return Response(status_code=400)
     return Response(status_code=201)
@@ -81,3 +89,19 @@ def api_post_network_on_member(member: MemberHasNetwork):
     if network is not None:
         return Response(status_code=400)
     return Response(status_code=201)
+
+
+@app.delete("/members/category_delete")
+def api_delete_category_delete_by_member(member: MemberHasCategory):
+    verif = delete_category_delete_by_member(member)
+    if verif is not None:
+        return Response(status_code=400)
+    return Response(status_code=200)
+
+
+@app.delete("/members/network_delete")
+def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
+    verif = delete_network_delete_by_member(member)
+    if verif is not None:
+        return Response(status_code=400)
+    return Response(status_code=200)
