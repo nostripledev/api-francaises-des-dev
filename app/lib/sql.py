@@ -1,4 +1,9 @@
+import asyncio
 from collections import namedtuple
+from typing import Annotated
+
+from fastapi import File, UploadFile
+
 from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
     GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut
 
@@ -202,3 +207,29 @@ def delete_network_delete_by_member(member: MemberHasNetworkIn):
         return "ErrorSQL : the request was unsuccessful..."
     cursor.close()
     return None
+
+
+def add_image_portfolio(file: UploadFile, id_member: int):
+    cursor = mydb.cursor()
+    sql = "UPDATE member SET image_portfolio = %s WHERE id = %s"
+    try:
+        cursor.execute(sql, (file.file.read(), id_member))
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL : the request was unsuccessful..."
+    cursor.close()
+    file.close()
+    return None
+
+
+async def get_image_by_id_member(id: int):
+    try:
+        cursor = mydb.cursor()
+        sql = "SELECT image_portfolio FROM member WHERE id = %(id)s"
+        cursor.execute(sql, {'id': id})
+        result = cursor.fetchone()
+        cursor.close()
+        image = result[0]
+        return image
+    except mysql.connector.Error as e:
+        print(e)

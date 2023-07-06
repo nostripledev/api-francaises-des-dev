@@ -1,13 +1,21 @@
-from typing import List
+from typing import List, Annotated
 
-from app.lib.sql import get_members, get_member_by_id, post_member, patch_member_update
-from app.lib.sql import  get_categories, post_category, get_members_category, post_add_category_on_member, get_category_of_member_by_id, delete_category_delete_by_member
-from app.lib.sql import get_network_of_member_by_id , get_network, post_network_on_member, delete_network_delete_by_member
+from starlette.middleware.cors import CORSMiddleware
 
-from fastapi import FastAPI, Response
+from app.lib.sql import *
+
+from fastapi import FastAPI, Response, File, UploadFile
 from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/members", response_model=List[MemberWithCategory])
@@ -91,7 +99,7 @@ def api_post_network_on_member(member: MemberHasNetwork):
     return Response(status_code=201)
 
 
-@app.delete("/members/category_delete")
+@app.delete("/members/category")
 def api_delete_category_delete_by_member(member: MemberHasCategory):
     verif = delete_category_delete_by_member(member)
     if verif is not None:
@@ -99,9 +107,28 @@ def api_delete_category_delete_by_member(member: MemberHasCategory):
     return Response(status_code=200)
 
 
-@app.delete("/members/network_delete")
+@app.delete("/members/network")
 def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
     verif = delete_network_delete_by_member(member)
     if verif is not None:
         return Response(status_code=400)
     return Response(status_code=200)
+
+
+@app.post("/members/image_portfolio")
+def api_add_image_portfolio(file: UploadFile, id_member: int):
+    if file.content_type in ['image/jpeg', 'image/png']:
+        if file.size < 200*10000:
+            verif = add_image_portfolio(file, id_member)
+        else:
+            return Response(status_code=413)
+    else:
+        return Response(status_code=415)
+    if verif is not None:
+        return Response(status_code=500)
+    return Response(status_code=200)
+
+
+@app.get("/members/image_portfolio_by_id")
+async def api_get_image_portfolio_by_id_member(id_member: int):
+    return Response(content=await get_image_by_id_member(id_member), media_type="image/jpg")
