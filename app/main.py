@@ -117,13 +117,11 @@ def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
 
 @app.post("/members/image_portfolio")
 def api_add_image_portfolio(file: UploadFile, id_member: int):
-    if file.content_type in ['image/jpeg', 'image/png']:
-        if file.size < 200*10000:
-            verif = add_image_portfolio(file, id_member)
-        else:
-            return Response(status_code=413)
-    else:
+    if file.size > 200*10000:
+        return Response(status_code=413)
+    if file.content_type not in ['image/jpeg', 'image/png']:
         return Response(status_code=415)
+    verif = add_image_portfolio(file, id_member)
     if verif is not None:
         return Response(status_code=500)
     return Response(status_code=200)
