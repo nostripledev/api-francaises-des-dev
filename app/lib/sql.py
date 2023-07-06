@@ -1,8 +1,7 @@
 import asyncio
 from collections import namedtuple
-from typing import Annotated
 
-from fastapi import File, UploadFile
+from fastapi import UploadFile
 
 from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
     GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut
@@ -19,7 +18,7 @@ mydb = mysql.connector.connect(
 )
 
 
-def get_members():
+async def get_members():
     cursor = mydb.cursor()
     cursor.execute("SELECT member.id, member.username, member.url_portfolio, member.date_validate, "
                    "member.date_deleted, GROUP_CONCAT(category.name) FROM member, member_has_category, category WHERE "
@@ -33,7 +32,7 @@ def get_members():
             if member.date_validate is not None and member.date_deleted is None]
 
 
-def get_member_by_id(id_member):
+async def get_member_by_id(id_member):
     member_record = namedtuple("Member",
                                ["id", "username", "firstname", "lastname", "description", "mail", "url_portfolio",
                                 "date_validate", "date_deleted"])
@@ -77,7 +76,7 @@ def patch_member_update(member: MemberOut):
     return None
 
 
-def get_categories():
+async def get_categories():
     cursor = mydb.cursor()
     cursor.execute("SELECT id, name FROM category")
     result = cursor.fetchall()
@@ -100,7 +99,7 @@ def post_category(category: CategoryOut):
     return None
 
 
-def get_members_category(name_category: str):
+async def get_members_category(name_category: str):
     cursor = mydb.cursor()
     sql = "SELECT member.* FROM member, member_has_category, category WHERE member.id = member_has_category.id_member " \
           "AND member_has_category.id_category = category.id AND category.name = %(name)s"
@@ -140,7 +139,7 @@ def post_add_category_on_member(member: MemberHasCategoryIn):
     return None
 
 
-def get_network_of_member_by_id(id_member: int):
+async def get_network_of_member_by_id(id_member: int):
     cursor = mydb.cursor()
     sql = "SELECT network.name, member_has_network.url FROM network, member_has_network, member WHERE member.id = " \
           "member_has_network.id_member AND member_has_network.id_network = network.id AND member.id = %(id)s"
@@ -151,7 +150,7 @@ def get_network_of_member_by_id(id_member: int):
     return [GetMemberHasNetwork(name=network.name, url=network.url) for network in map(network_record._make, result)]
 
 
-def get_category_of_member_by_id(id_member: MemberById):
+async def get_category_of_member_by_id(id_member: MemberById):
     cursor = mydb.cursor()
     sql = "SELECT category.name FROM category, member, member_has_category WHERE member.id = " \
           "member_has_category.id_member AND member_has_category.id_category = category.id AND member.id = %(id)s"
@@ -162,7 +161,7 @@ def get_category_of_member_by_id(id_member: MemberById):
     return [CategoryOut(name=category.name) for category in map(category_record._make, result)]
 
 
-def get_network():
+async def get_network():
     cursor = mydb.cursor()
     sql = "SELECT * FROM network"
     cursor.execute(sql)

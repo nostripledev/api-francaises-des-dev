@@ -1,11 +1,12 @@
-from typing import List, Annotated
+from typing import List
 
 from starlette.middleware.cors import CORSMiddleware
 
 from app.lib.sql import *
 
-from fastapi import FastAPI, Response, File, UploadFile
-from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
+from fastapi import FastAPI, Response, UploadFile
+from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
+    GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
 
 app = FastAPI()
 
@@ -19,13 +20,13 @@ app.add_middleware(
 
 
 @app.get("/members", response_model=List[MemberWithCategory])
-def api_get_members():
-    return get_members()
+async def api_get_members():
+    return await get_members()
 
 
 @app.get("/members/{id:int}", response_model=MemberIn)
-def api_get_member_by_id(id: int):
-    member = get_member_by_id(id)
+async def api_get_member_by_id(id: int):
+    member = await get_member_by_id(id)
     if member is None:
         return Response(status_code=404)
     return member
@@ -48,8 +49,8 @@ def api_patch_member_update(member: MemberOut):
 
 
 @app.get("/categories", response_model=List[Category])
-def api_get_categories():
-    return get_categories()
+async def api_get_categories():
+    return await get_categories()
 
 
 @app.post("/categories")
@@ -61,8 +62,8 @@ def api_post_category(category: CategoryOut):
 
 
 @app.get("/members/category={name:str}")
-def api_get_members_category(name: str):
-    member = get_members_category(name)
+async def api_get_members_category(name: str):
+    member = await get_members_category(name)
     if member is None:
         return Response(status_code=404)
     return member
@@ -77,18 +78,18 @@ def api_post_add_category_on_member(member: MemberHasCategoryIn):
 
 
 @app.get("/network", response_model=List[Network])
-def api_get_network():
-    return get_network()
+async def api_get_network():
+    return await get_network()
 
 
 @app.get("/members/network", response_model=List[GetMemberHasNetwork])
-def api_get_network_of_member(id_member: int):
-    return get_network_of_member_by_id(id_member)
+async def api_get_network_of_member(id_member: int):
+    return await get_network_of_member_by_id(id_member)
 
 
 @app.get("/members/list_category", response_model=List[CategoryOut])
-def api_get_category_of_member_by_id(member: MemberById):
-    return get_category_of_member_by_id(member)
+async def api_get_category_of_member_by_id(member: MemberById):
+    return await get_category_of_member_by_id(member)
 
 
 @app.post("/members/network")
