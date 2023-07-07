@@ -1,4 +1,3 @@
-import asyncio
 from collections import namedtuple
 
 from fastapi import UploadFile

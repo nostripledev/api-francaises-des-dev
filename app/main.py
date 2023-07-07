@@ -1,12 +1,17 @@
 from typing import List
 
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
 
 from app.lib.sql import *
 
 from fastapi import FastAPI, Response, UploadFile
 from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
     GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
+
+from fastapi_sso.sso.github import GithubSSO
+
+from app.settings import *
 
 app = FastAPI()
 
@@ -17,6 +22,28 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+github_sso = GithubSSO(GITHUB["client_id"], GITHUB["client_secret"], f"{GITHUB['callback_uri']}/github/callback")
+
+
+@app.get("/github/login")
+async def github_login():
+    """Generate login url and redirect"""
+    return await github_sso.get_login_redirect()
+
+
+@app.get("/github/callback")
+async def github_callback(request: Request):
+    """Process login response from Google and return user info"""
+    user = await github_sso.verify_and_process(request)
+    return {
+        "id": user.id,
+        "picture": user.picture,
+        "display_name": user.display_name,
+        "email": user.email,
+        "provider": user.provider,
+    }
 
 
 @app.get("/members", response_model=List[MemberWithCategory])
