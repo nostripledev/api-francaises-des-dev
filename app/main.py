@@ -145,15 +145,14 @@ async def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
 
 @app.post("/members/image_portfolio")
 async def api_add_image_portfolio(file: UploadFile, id_member: int):
-    if file.size > 200*10000:
+    if file.size > 200*10000 or \
+       (file.content_type not in ['image/jpeg', 'image/png'] and \
+        not file.filename.lower().endswith(tuple( ['.png', '.jpg']))):
         return Response(status_code=413)
-    if file.content_type not in ['image/jpeg', 'image/png']:
-        return Response(status_code=415)
     verif = await add_image_portfolio(file, id_member)
     if verif is not None:
         return Response(status_code=500)
     return Response(status_code=200)
-
 
 @app.get("/members/image_portfolio_by_id")
 async def api_get_image_portfolio_by_id_member(id_member: int):
