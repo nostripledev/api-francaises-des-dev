@@ -48,7 +48,7 @@ async def get_member_by_id(id_member):
                     description=member.description, mail=member.mail, url_portfolio=member.url_portfolio)
 
 
-def post_member(member: MemberIn):
+async def post_member(member: MemberIn):
     cursor = mydb.cursor()
     sql = "INSERT INTO member (username, firstname, lastname, description, mail, url_portfolio) VALUES (%s, %s, %s, " \
           "%s, %s, %s)"
@@ -62,7 +62,7 @@ def post_member(member: MemberIn):
     return None
 
 
-def patch_member_update(member: MemberOut):
+async def patch_member_update(member: MemberOut):
     cursor = mydb.cursor()
     sql = "UPDATE member SET username = %s, firstname = %s, lastname = %s, description = %s, mail = %s, url_portfolio " \
           "= %s WHERE id = %s"
@@ -86,7 +86,7 @@ async def get_categories():
             map(category_record._make, result)]
 
 
-def post_category(category: CategoryOut):
+async def post_category(category: CategoryOut):
     cursor = mydb.cursor()
     sql = "INSERT INTO category (name) VALUES (%s)"
     val = [category.name]
@@ -114,7 +114,7 @@ async def get_members_category(name_category: str):
             if member.date_validate is not None and member.date_deleted is None]
 
 
-def return_id_category_by_name(name: str):
+async def return_id_category_by_name(name: str):
     cursor = mydb.cursor()
     sql = "SELECT id FROM category WHERE name = %(name)s"
     try:
@@ -125,7 +125,7 @@ def return_id_category_by_name(name: str):
         return "ErrorSQL : the request was unsuccessful"
 
 
-def post_add_category_on_member(member: MemberHasCategoryIn):
+async def post_add_category_on_member(member: MemberHasCategoryIn):
     cursor = mydb.cursor()
     sql = "INSERT INTO member_has_category (id_member, id_category) SELECT %s, %s FROM DUAL WHERE NOT EXISTS (SELECT " \
           "1 FROM member_has_category WHERE id_member = %s AND id_category = %s);"
@@ -171,7 +171,7 @@ async def get_network():
     return [Network(id=network.id, name=network.name) for network in map(network_record._make, result)]
 
 
-def post_network_on_member(member: MemberHasNetwork):
+async def post_network_on_member(member: MemberHasNetwork):
     cursor = mydb.cursor()
     sql = "INSERT INTO member_has_network (id_member, id_network, url) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE " \
           "url = %s"
@@ -184,7 +184,7 @@ def post_network_on_member(member: MemberHasNetwork):
     return None
 
 
-def delete_category_delete_by_member(member: MemberHasCategory):
+async def delete_category_delete_by_member(member: MemberHasCategory):
     cursor = mydb.cursor()
     sql = "DELETE FROM member_has_category WHERE id_member = %s AND id_category = %s"
     try:
@@ -196,7 +196,7 @@ def delete_category_delete_by_member(member: MemberHasCategory):
     return None
 
 
-def delete_network_delete_by_member(member: MemberHasNetworkIn):
+async def delete_network_delete_by_member(member: MemberHasNetworkIn):
     cursor = mydb.cursor()
     sql = "DELETE FROM member_has_network WHERE id_member = %s AND id_network = %s"
     try:
@@ -208,7 +208,7 @@ def delete_network_delete_by_member(member: MemberHasNetworkIn):
     return None
 
 
-def add_image_portfolio(file: UploadFile, id_member: int):
+async def add_image_portfolio(file: UploadFile, id_member: int):
     cursor = mydb.cursor()
     sql = "UPDATE member SET image_portfolio = %s WHERE id = %s"
     try:

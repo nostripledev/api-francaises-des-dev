@@ -33,16 +33,16 @@ async def api_get_member_by_id(id: int):
 
 
 @app.post("/members", response_model=MemberOut)
-def api_post_member(member: MemberIn):
-    result = post_member(member)
+async def api_post_member(member: MemberIn):
+    result = await post_member(member)
     if result is not None:
         return Response(status_code=400)
     return Response(status_code=200)
 
 
 @app.patch("/members/update")
-def api_patch_member_update(member: MemberOut):
-    result = patch_member_update(member)
+async def api_patch_member_update(member: MemberOut):
+    result = await patch_member_update(member)
     if result is not None:
         return Response(status_code=400)
     return Response(status_code=201)
@@ -54,8 +54,8 @@ async def api_get_categories():
 
 
 @app.post("/categories")
-def api_post_category(category: CategoryOut):
-    result = post_category(category)
+async def api_post_category(category: CategoryOut):
+    result = await post_category(category)
     if result is not None:
         return Response(status_code=400)
     return Response(status_code=201)
@@ -70,8 +70,8 @@ async def api_get_members_category(name: str):
 
 
 @app.post("/members/category")
-def api_post_add_category_on_member(member: MemberHasCategoryIn):
-    category = post_add_category_on_member(member)
+async def api_post_add_category_on_member(member: MemberHasCategoryIn):
+    category = await post_add_category_on_member(member)
     if category is not None:
         return Response(status_code=400)
     return Response(status_code=201)
@@ -93,36 +93,36 @@ async def api_get_category_of_member_by_id(member: MemberById):
 
 
 @app.post("/members/network")
-def api_post_network_on_member(member: MemberHasNetwork):
-    network = post_network_on_member(member)
+async def api_post_network_on_member(member: MemberHasNetwork):
+    network = await post_network_on_member(member)
     if network is not None:
         return Response(status_code=400)
     return Response(status_code=201)
 
 
 @app.delete("/members/category")
-def api_delete_category_delete_by_member(member: MemberHasCategory):
-    verif = delete_category_delete_by_member(member)
+async def api_delete_category_delete_by_member(member: MemberHasCategory):
+    verif = await delete_category_delete_by_member(member)
     if verif is not None:
         return Response(status_code=400)
     return Response(status_code=200)
 
 
 @app.delete("/members/network")
-def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
-    verif = delete_network_delete_by_member(member)
+async def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
+    verif = await delete_network_delete_by_member(member)
     if verif is not None:
         return Response(status_code=400)
     return Response(status_code=200)
 
 
 @app.post("/members/image_portfolio")
-def api_add_image_portfolio(file: UploadFile, id_member: int):
+async def api_add_image_portfolio(file: UploadFile, id_member: int):
     if file.size > 200*10000:
         return Response(status_code=413)
     if file.content_type not in ['image/jpeg', 'image/png']:
         return Response(status_code=415)
-    verif = add_image_portfolio(file, id_member)
+    verif = await add_image_portfolio(file, id_member)
     if verif is not None:
         return Response(status_code=500)
     return Response(status_code=200)
