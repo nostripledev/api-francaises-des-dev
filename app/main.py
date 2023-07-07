@@ -114,9 +114,9 @@ async def api_get_network_of_member(id_member: int):
     return await get_network_of_member_by_id(id_member)
 
 
-@app.get("/members/list_category", response_model=List[CategoryOut])
-async def api_get_category_of_member_by_id(member: MemberById):
-    return await get_category_of_member_by_id(member)
+@app.get("/members/list_category/{id:int}", response_model=List[CategoryOut])
+async def api_get_category_of_member_by_id(id: int):
+    return await get_category_of_member_by_id(id)
 
 
 @app.post("/members/network")
