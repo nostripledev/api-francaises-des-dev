@@ -149,11 +149,11 @@ async def get_network_of_member_by_id(id_member: int):
     return [GetMemberHasNetwork(name=network.name, url=network.url) for network in map(network_record._make, result)]
 
 
-async def get_category_of_member_by_id(id_member: MemberById):
+async def get_category_of_member_by_id(id_member: int):
     cursor = mydb.cursor()
     sql = "SELECT category.name FROM category, member, member_has_category WHERE member.id = " \
           "member_has_category.id_member AND member_has_category.id_category = category.id AND member.id = %(id)s"
-    cursor.execute(sql, {'id': id_member.id})
+    cursor.execute(sql, {'id': id_member})
     result = cursor.fetchall()
     category_record = namedtuple("Category", ["name"])
     cursor.close()
