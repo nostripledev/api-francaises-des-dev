@@ -1,9 +1,12 @@
+import secrets
+
 from typing import List
 
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from app.lib.sql import *
+from app.lib.function import *
 
 from fastapi import FastAPI, Response, UploadFile
 from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
@@ -148,6 +151,8 @@ async def api_add_image_portfolio(file: UploadFile, id_member: int):
     if file.size > 200*10000:
         return Response(status_code=413)
     if file.content_type not in ['image/jpeg', 'image/png']:
+        return Response(status_code=415)
+    if verifIsPngAndJpeg(file) is None:
         return Response(status_code=415)
     verif = await add_image_portfolio(file, id_member)
     if verif is not None:
