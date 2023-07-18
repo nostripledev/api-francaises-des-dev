@@ -1,1 +1,8 @@
 *.env
+.idea
+__pycache__
+*.swp
+.idea
+.pytest_cache
+.coverage
+.vscode
