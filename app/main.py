@@ -10,7 +10,7 @@ from app.lib.function import *
 
 from fastapi import FastAPI, Response, UploadFile
 from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
-    GetMemberHasNetwork, MemberById, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
+    GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
 
 from fastapi_sso.sso.github import GithubSSO
 
@@ -40,6 +40,13 @@ async def github_login():
 async def github_callback(request: Request):
     """Process login response from Google and return user info"""
     user = await github_sso.verify_and_process(request)
+    member = await get_member_by_username(user.display_name)
+    if member is None:
+        new_member = MemberIn(username=user.display_name, firstname="",lastname="",description="",mail="",url_portfolio="")
+        member = await create_member(new_member)
+    access_token = secrets.token_hex(16)
+    refresh_token = secrets.token_hex(16)
+    await register_token(access_token, refresh_token, member)
     return {
         "id": user.id,
         "picture": user.picture,

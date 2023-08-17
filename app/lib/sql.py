@@ -47,7 +47,7 @@ async def get_member_by_id(id_member):
                     description=member.description, mail=member.mail, url_portfolio=member.url_portfolio)
 
 
-async def post_member(member: MemberIn):
+async def create_member(member: MemberIn):
     cursor = mydb.cursor()
     sql = "INSERT INTO member (username, firstname, lastname, description, mail, url_portfolio) VALUES (%s, %s, %s, " \
           "%s, %s, %s)"
@@ -57,8 +57,9 @@ async def post_member(member: MemberIn):
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."
+    id = cursor.lastrowid
     cursor.close()
-    return None
+    return id
 
 
 async def patch_member_update(member: MemberOut):
@@ -244,3 +245,23 @@ async def register_new_member(id: int, name: str):
         return "ErrorSQL: the request was unsuccessful..."
     cursor.close()
     return None
+
+
+async def get_member_by_username(username: str):
+    member_record = namedtuple("Member",
+                               ["id", "username", "firstname", "lastname", "description", "mail", "url_portfolio",
+                                "date_validate", "date_deleted"])
+    cursor = mydb.cursor()
+    query = "SELECT {} FROM member WHERE username = %(username)s".format(", ".join(member_record._fields))
+    cursor.execute(query, {'username': username})
+    result = cursor.fetchone()
+    cursor.close()
+    if result is None:
+        return None
+    member = member_record._make(result)
+    return MemberIn(id=member.id, username=member.username, firstname=member.firstname, lastname=member.lastname,
+                    description=member.description, mail=member.mail, url_portfolio=member.url_portfolio)
+
+
+async def register_token(access_token: str, refresh_token: str, id_user: int):
+    print("test")
