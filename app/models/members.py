@@ -8,13 +8,13 @@ class MemberById(BaseModel):
     id: int
 
 
-class MemberIn(BaseModel):
+class MemberIn(MemberById):
     username: str
-    firstname: str
-    lastname: str
-    description: str
-    mail: str
-    url_portfolio: str
+    firstname: Optional[str]
+    lastname: Optional[str]
+    description: Optional[str]
+    mail: Optional[str]
+    url_portfolio: Optional[str]
 
 
 class MemberOut(MemberIn):

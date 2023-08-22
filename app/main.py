@@ -42,17 +42,16 @@ async def github_callback(request: Request):
     user = await github_sso.verify_and_process(request)
     member = await get_member_by_username(user.display_name)
     if member is None:
-        new_member = MemberIn(username=user.display_name, firstname="",lastname="",description="",mail="",url_portfolio="")
-        member = await create_member(new_member)
+        member_id = await register_new_member(user.display_name)
+    else :
+        member_id = member.id
     access_token = secrets.token_hex(16)
     refresh_token = secrets.token_hex(16)
-    await register_token(access_token, refresh_token, member)
+    test = await register_token(access_token, refresh_token, member_id)
+    print(test)
     return {
-        "id": user.id,
-        "picture": user.picture,
-        "display_name": user.display_name,
-        "email": user.email,
-        "provider": user.provider,
+        "access_token": access_token,
+        "refresh_token": refresh_token
     }
 
 

@@ -2,6 +2,8 @@ from collections import namedtuple
 
 from fastapi import UploadFile
 
+from datetime import datetime
+
 from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
     GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut
 
@@ -234,17 +236,18 @@ async def get_image_by_id_member(id: int):
         print(e)
 
 
-async def register_new_member(id: int, name: str):
+async def register_new_member(name: str):
     cursor = mydb.cursor()
-    sql = "INSERT INTO member (id, username) VALUES (%s, %s)"
-    val = (id, name)
+    sql = "INSERT INTO member (username) VALUES (%s)"
     try:
-        cursor.execute(sql, val)
+        cursor.execute(sql, (name,))
         mydb.commit()
-    except mysql.connector.Error:
+        id = cursor.lastrowid
+    except mysql.connector.Error as exc:
+        print(exc)
         return "ErrorSQL: the request was unsuccessful..."
     cursor.close()
-    return None
+    return id
 
 
 async def get_member_by_username(username: str):
@@ -264,4 +267,13 @@ async def get_member_by_username(username: str):
 
 
 async def register_token(access_token: str, refresh_token: str, id_user: int):
-    print("test")
+    cursor = mydb.cursor()
+    query = "INSERT INTO session (token_session, token_refresh, id_member) VALUES (%s, %s, %s)"
+    val = (access_token, refresh_token, id_user)
+    try:
+        cursor.execute(query, val)
+        mydb.commit()
+    except mysql.connector.Error:
+        return "Error SQL : the request was unsuccessfully..."
+    cursor.close()
+    return None
