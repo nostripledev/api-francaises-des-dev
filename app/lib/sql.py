@@ -2,8 +2,6 @@ from collections import namedtuple
 
 from fastapi import UploadFile
 
-from datetime import datetime
-
 from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
     GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut
 

@@ -1,22 +1,34 @@
+import json
 import secrets
-
+import jwt
 from typing import List
 
+from fastapi import FastAPI, Response, UploadFile
+from fastapi.responses import ORJSONResponse
+from fastapi_sso.sso.github import GithubSSO
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
-from app.lib.sql import *
 from app.lib.function import *
-
-from fastapi import FastAPI, Response, UploadFile
+from app.lib.sql import *
 from app.models import MemberIn, MemberOut, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
     GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn
-
-from fastapi_sso.sso.github import GithubSSO
-
 from app.settings import *
 
 app = FastAPI()
+
+# Clé secrète pour signer le token JWT
+SECRET_KEY = "votre_clé_secrète"
+# Algorithme de signature JWT
+ALGORITHM = "HS256"
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,7 +37,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 github_sso = GithubSSO(GITHUB["client_id"], GITHUB["client_secret"], f"{GITHUB['callback_uri']}/github/callback")
 
@@ -43,16 +54,22 @@ async def github_callback(request: Request):
     member = await get_member_by_username(user.display_name)
     if member is None:
         member_id = await register_new_member(user.display_name)
-    else :
+    else:
         member_id = member.id
     access_token = secrets.token_hex(16)
     refresh_token = secrets.token_hex(16)
-    test = await register_token(access_token, refresh_token, member_id)
-    print(test)
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token
-    }
+    user_id = 1
+    await register_token(access_token, refresh_token, member_id)
+    token_data = {"user_id": user_id, "access_token": access_token, "refresh_token": refresh_token}
+    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+    # Créez un cookie HTTP avec le token
+    response = JSONResponse(content={"message": "Bienvenue sur la page réservée aux utilisateurs connectés !"})
+    response.set_cookie(key="access_token", value=token, httponly=True)
+    # Redirigez l'utilisateur vers la page de profil
+    url_response = f"http://localhost:5173/profil/{user_id}"
+    response.headers["Location"] = url_response  # Réglez l'URL de redirection
+    response.status_code = 303  # Utilisez le code de statut 303 pour indiquer une redirection
+    return response
 
 
 @app.get("/members", response_model=List[MemberWithCategory])
@@ -68,15 +85,7 @@ async def api_get_member_by_id(id: int):
     return member
 
 
-@app.post("/members", response_model=MemberOut)
-async def api_post_member(member: MemberIn):
-    result = await post_member(member)
-    if result is not None:
-        return Response(status_code=400)
-    return Response(status_code=200)
-
-
-@app.patch("/members/update")
+@app.patch("/members")
 async def api_patch_member_update(member: MemberOut):
     result = await patch_member_update(member)
     if result is not None:
@@ -154,7 +163,7 @@ async def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
 
 @app.post("/members/image_portfolio")
 async def api_add_image_portfolio(file: UploadFile, id_member: int):
-    if file.size > 200*10000:
+    if file.size > 200 * 10000:
         return Response(status_code=413)
     if file.content_type not in ['image/jpeg', 'image/png']:
         return Response(status_code=415)
