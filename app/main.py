@@ -3,8 +3,8 @@ import secrets
 import jwt
 from typing import List
 
-from fastapi import FastAPI, Response, UploadFile
-from fastapi.responses import ORJSONResponse
+from fastapi import FastAPI, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi_sso.sso.github import GithubSSO
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -48,7 +48,7 @@ async def github_login():
 
 
 @app.get("/github/callback")
-async def github_callback(request: Request):
+async def github_callback(request: Request) -> Response:
     """Process login response from Google and return user info"""
     user = await github_sso.verify_and_process(request)
     member = await get_member_by_username(user.display_name)
@@ -58,17 +58,14 @@ async def github_callback(request: Request):
         member_id = member.id
     access_token = secrets.token_hex(16)
     refresh_token = secrets.token_hex(16)
-    user_id = 1
     await register_token(access_token, refresh_token, member_id)
-    token_data = {"user_id": user_id, "access_token": access_token, "refresh_token": refresh_token}
+    token_data = {"user_id": member_id, "access_token": access_token, "refresh_token": refresh_token}
     token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
-    # Créez un cookie HTTP avec le token
-    response = JSONResponse(content={"message": "Bienvenue sur la page réservée aux utilisateurs connectés !"})
-    response.set_cookie(key="access_token", value=token, httponly=True)
     # Redirigez l'utilisateur vers la page de profil
-    url_response = f"http://localhost:5173/profil/{user_id}"
-    response.headers["Location"] = url_response  # Réglez l'URL de redirection
-    response.status_code = 303  # Utilisez le code de statut 303 pour indiquer une redirection
+    url_response = f"http://localhost:5173/profil/{member_id}"
+    response = RedirectResponse(url=url_response)
+    # Créez un cookie HTTP avec le token
+    response.set_cookie(key="access_token", value=token, httponly=True)
     return response
 
 
@@ -87,6 +84,7 @@ async def api_get_member_by_id(id: int):
 
 @app.patch("/members")
 async def api_patch_member_update(member: MemberOut):
+    print(member)
     result = await patch_member_update(member)
     if result is not None:
         return Response(status_code=400)
@@ -161,7 +159,7 @@ async def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
     return Response(status_code=200)
 
 
-@app.post("/members/image_portfolio")
+@app.patch("/members/image_portfolio")
 async def api_add_image_portfolio(file: UploadFile, id_member: int):
     if file.size > 200 * 10000:
         return Response(status_code=413)

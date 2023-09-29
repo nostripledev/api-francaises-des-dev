@@ -64,9 +64,9 @@ async def create_member(member: MemberIn):
 
 async def patch_member_update(member: MemberOut):
     cursor = mydb.cursor()
-    sql = "UPDATE member SET username = %s, firstname = %s, lastname = %s, description = %s, mail = %s, url_portfolio " \
+    sql = "UPDATE member SET firstname = %s, lastname = %s, description = %s, mail = %s, url_portfolio " \
           "= %s WHERE id = %s"
-    val = (member.username, member.firstname, member.lastname, member.description, member.mail, member.url_portfolio, member.id)
+    val = (member.firstname, member.lastname, member.description, member.mail, member.url_portfolio, member.id)
     try:
         cursor.execute(sql, val)
         mydb.commit()

@@ -8,8 +8,7 @@ class MemberById(BaseModel):
     id: int
 
 
-class MemberIn(MemberById):
-    username: str
+class Member(MemberById):
     firstname: Optional[str]
     lastname: Optional[str]
     description: Optional[str]
@@ -17,12 +16,12 @@ class MemberIn(MemberById):
     url_portfolio: Optional[str]
 
 
+class MemberIn(Member):
+    username: Optional[str]
+
+
 class MemberOut(MemberIn):
-    id: str
     date_activated: Optional[datetime] = None
-
-
-class Member(MemberOut):
     date_deleted: Optional[datetime] = None
 
 
