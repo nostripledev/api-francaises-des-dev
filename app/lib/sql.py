@@ -125,13 +125,20 @@ async def return_id_category_by_name(name: str):
         return "ErrorSQL : the request was unsuccessful"
 
 
-async def post_add_category_on_member(member: MemberHasCategoryIn):
+async def post_add_category_on_member(member: MemberHasCategory):
     cursor = mydb.cursor()
-    sql = "INSERT INTO member_has_category (id_member, id_category) SELECT %s, %s FROM DUAL WHERE NOT EXISTS (SELECT " \
-          "1 FROM member_has_category WHERE id_member = %s AND id_category = %s);"
-    id_category = return_id_category_by_name(member.name)
+    sql = """
+    INSERT INTO member_has_category (id_member, id_category) values (%s,%s)
+    """
     try:
-        cursor.execute(sql, (member.id_member, id_category, member.id_member, id_category))
+        values = []
+        for cate in member.id_category:
+            values.append([member.id_member, cate])
+
+        print("---")
+        print(values)
+
+        cursor.executemany(sql, values)
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."

@@ -55,7 +55,7 @@ async def api_get_image_portfolio_by_id_member(id_member: int):
 
 
 @router.post("/category")
-async def api_post_add_category_on_member(member: MemberHasCategoryIn):
+async def api_post_add_category_on_member(member: MemberHasCategory):
     category = await post_add_category_on_member(member)
     if category is not None:
         return Response(status_code=400)
@@ -81,3 +81,17 @@ async def api_get_members_category(name: str):
     if member is None:
         return Response(status_code=404)
     return member
+
+
+@router.get("/network/{id:int}", response_model=List[GetMemberHasNetwork])
+async def api_get_network_of_member(id: int):
+    print()
+    return await get_network_of_member_by_id(id)
+
+
+@router.post("/network/{id:int}")
+async def api_post_network_on_member(member: MemberHasNetwork):
+    network = await post_network_on_member(member)
+    if network is not None:
+        return Response(status_code=400)
+    return Response(status_code=201)
