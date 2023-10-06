@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 
@@ -6,8 +8,10 @@ class MemberHasNetworkIn(BaseModel):
     id_network: int
 
 
-class MemberHasNetwork(MemberHasNetworkIn):
-    url: str
+class MemberHasNetwork(BaseModel):
+    id_member: int
+    id_network: List[int]
+    url: List[str]
 
 
 class GetMemberHasNetwork(BaseModel):

@@ -11,7 +11,6 @@ router = APIRouter(
 
 @router.get("/", response_model=List[Network])
 async def api_get_network():
-    print("c'est moi")
     return await get_network()
 
 

@@ -28,7 +28,6 @@ async def api_get_member_by_id(id: int):
 
 @router.patch("/")
 async def api_patch_member_update(member: MemberOut):
-    print(member)
     result = await patch_member_update(member)
     if result is not None:
         return Response(status_code=400)
@@ -85,11 +84,10 @@ async def api_get_members_category(name: str):
 
 @router.get("/network/{id:int}", response_model=List[GetMemberHasNetwork])
 async def api_get_network_of_member(id: int):
-    print()
     return await get_network_of_member_by_id(id)
 
 
-@router.post("/network/{id:int}")
+@router.post("/network")
 async def api_post_network_on_member(member: MemberHasNetwork):
     network = await post_network_on_member(member)
     if network is not None:

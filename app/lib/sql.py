@@ -134,10 +134,6 @@ async def post_add_category_on_member(member: MemberHasCategory):
         values = []
         for cate in member.id_category:
             values.append([member.id_member, cate])
-
-        print("---")
-        print(values)
-
         cursor.executemany(sql, values)
         mydb.commit()
     except mysql.connector.Error:
@@ -181,11 +177,15 @@ async def get_network():
 async def post_network_on_member(member: MemberHasNetwork):
     cursor = mydb.cursor()
     sql = "INSERT INTO member_has_network (id_member, id_network, url) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE " \
-          "url = %s"
+          "url = VALUES(url)"
     try:
-        cursor.execute(sql, (member.id_member, member.id_network, member.url, member.url))
+        values = []
+        for url, network in zip(member.url, member.id_network):
+            if url != "" and url is not None:
+                values.append([member.id_member, network, url])
+        cursor.executemany(sql, values)
         mydb.commit()
-    except mysql.connector.Error:
+    except mysql.connector.Error as e:
         return "ErrorSQL: the request was unsuccessful..."
     cursor.close()
     return None
