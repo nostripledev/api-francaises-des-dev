@@ -130,7 +130,8 @@ async def return_id_category_by_name(name: str):
 async def post_add_category_on_member(member: MemberHasCategory):
     cursor = mydb.cursor()
     sql = """
-    INSERT INTO member_has_category (id_member, id_category) values (%s,%s)
+    INSERT INTO member_has_category (id_member, id_category) VALUES (%s, %s)
+    ON DUPLICATE KEY UPDATE id_member=id_member 
     """
     try:
         values = []
