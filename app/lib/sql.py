@@ -8,6 +8,8 @@ from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCa
 from app import settings
 import mysql.connector
 
+from app.models.member_has_category import MemberHasCategoryOut
+
 mydb = mysql.connector.connect(
     host=settings.HOST,
     user=settings.USER,
@@ -162,6 +164,18 @@ async def get_category_of_member_by_id(id_member: int):
     category_record = namedtuple("Category", ["name"])
     cursor.close()
     return [CategoryOut(name=category.name) for category in map(category_record._make, result)]
+
+
+async def get_member_has_category_by_id_member(id_member: int):
+    cursor = mydb.cursor()
+    sql = "SELECT member_has_category.id_member, category.name, member_has_category.id_category FROM " \
+          "member, member_has_category, category WHERE member.id = member_has_category.id_member AND " \
+          "member_has_category.id_category = category.id AND member.id = %(id)s"
+    cursor.execute(sql, {'id': id_member})
+    result = cursor.fetchall()
+    category_record = namedtuple("MemberHasCategory", ["id_member","name","id_category"])
+    cursor.close()
+    return [MemberHasCategoryOut(id_member=category.id_member, name=category.name, id_category=category.id_category) for category in map(category_record._make, result)]
 
 
 async def get_network():

@@ -8,6 +8,12 @@ class MemberHasCategory(BaseModel):
     id_category: List[int]
 
 
+class MemberHasCategoryOut(BaseModel):
+    id_member: int
+    name: str
+    id_category: int
+
+
 class MemberHasCategoryIn(BaseModel):
     id_member: int
     name: str

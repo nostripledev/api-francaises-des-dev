@@ -6,6 +6,7 @@ from starlette.responses import Response
 from app.lib.function import verifIsPngAndJpeg
 from app.lib.sql import *
 from app.models import *
+from app.models.member_has_category import MemberHasCategoryOut
 
 router = APIRouter(
     prefix="/member",
@@ -64,6 +65,11 @@ async def api_post_add_category_on_member(member: MemberHasCategory):
 @router.get("/list_category/{id:int}", response_model=List[CategoryOut])
 async def api_get_category_of_member_by_id(id: int):
     return await get_category_of_member_by_id(id)
+
+
+@router.get("/category/{id:int}", response_model=List[MemberHasCategoryOut])
+async def api_get_member_has_category_by_id_member(id: int):
+    return await get_member_has_category_by_id_member(id)
 
 
 @router.delete("/category")
