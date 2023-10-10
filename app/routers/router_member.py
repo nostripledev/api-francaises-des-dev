@@ -95,7 +95,16 @@ async def api_get_network_of_member(id: int):
 
 @router.post("/network")
 async def api_post_network_on_member(member: MemberHasNetwork):
-    network = await post_network_on_member(member)
-    if network is not None:
+    networks = await post_network_on_member(member)
+    if networks is not None:
         return Response(status_code=400)
     return Response(status_code=201)
+
+
+@router.delete("/network")
+async def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
+    verif = await delete_network_delete_by_member(member)
+    if verif is not None:
+        return Response(status_code=400)
+    return Response(status_code=200)
+

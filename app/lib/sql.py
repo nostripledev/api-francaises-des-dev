@@ -147,13 +147,13 @@ async def post_add_category_on_member(member: MemberHasCategory):
 
 async def get_network_of_member_by_id(id_member: int):
     cursor = mydb.cursor()
-    sql = "SELECT network.name, member_has_network.url FROM network, member_has_network, member WHERE member.id = " \
+    sql = "SELECT network.name, member_has_network.url, member_has_network.id_network FROM network, member_has_network, member WHERE member.id = " \
           "member_has_network.id_member AND member_has_network.id_network = network.id AND member.id = %(id)s"
     cursor.execute(sql, {'id': id_member})
     result = cursor.fetchall()
-    network_record = namedtuple("Network", ["name", "url"])
+    network_record = namedtuple("Network", ["name", "url", "id_network"])
     cursor.close()
-    return [GetMemberHasNetwork(name=network.name, url=network.url) for network in map(network_record._make, result)]
+    return [GetMemberHasNetwork(name=network.name, url=network.url, id_network=network.id_network) for network in map(network_record._make, result)]
 
 
 async def get_category_of_member_by_id(id_member: int):
@@ -210,7 +210,10 @@ async def delete_category_delete_by_member(member: MemberHasCategory):
     cursor = mydb.cursor()
     sql = "DELETE FROM member_has_category WHERE id_member = %s AND id_category = %s"
     try:
-        cursor.execute(sql, (member.id_member, member.id_category))
+        values = []
+        for cate in member.id_category:
+            values.append([member.id_member, cate])
+        cursor.executemany(sql, values)
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."
@@ -222,7 +225,10 @@ async def delete_network_delete_by_member(member: MemberHasNetworkIn):
     cursor = mydb.cursor()
     sql = "DELETE FROM member_has_network WHERE id_member = %s AND id_network = %s"
     try:
-        cursor.execute(sql, (member.id_member, member.id_network))
+        values = []
+        for network in member.id_network:
+            values.append([member.id_member, network])
+        cursor.executemany(sql, values)
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL : the request was unsuccessful..."
@@ -264,7 +270,6 @@ async def register_new_member(name: str):
         mydb.commit()
         id = cursor.lastrowid
     except mysql.connector.Error as exc:
-        print(exc)
         return "ErrorSQL: the request was unsuccessful..."
     cursor.close()
     return id

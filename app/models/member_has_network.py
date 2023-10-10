@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class MemberHasNetworkIn(BaseModel):
     id_member: int
-    id_network: int
+    id_network: List[int]
 
 
 class MemberHasNetwork(BaseModel):
@@ -17,3 +17,4 @@ class MemberHasNetwork(BaseModel):
 class GetMemberHasNetwork(BaseModel):
     name: str
     url: str
+    id_network: int
