@@ -12,16 +12,15 @@ from app.settings import GITHUB
 
 from datetime import  datetime, timedelta
 
-# Clé secrète pour signer le token JWT
-SECRET_KEY = "votre_clé_secrète"
-# Algorithme de signature JWT
-ALGORITHM = "HS256"
+from app import settings
 
 router = APIRouter(
     prefix="/github",
     tags=["github"]
 )
 
+ALGORITHM = settings.ALGORITHM
+SECRET_KEY = settings.SECRET_KEY
 
 github_sso = GithubSSO(GITHUB["client_id"], GITHUB["client_secret"], f"{GITHUB['callback_uri']}/github/callback")
 

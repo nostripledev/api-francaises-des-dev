@@ -5,11 +5,6 @@ from .routers import *
 
 app = FastAPI()
 
-# Clé secrète pour signer le token JWT
-SECRET_KEY = "votre_clé_secrète"
-# Algorithme de signature JWT
-ALGORITHM = "HS256"
-
 origins = [
     "http://localhost.tiangolo.com",
     "https://localhost.tiangolo.com",
