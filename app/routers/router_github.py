@@ -10,6 +10,8 @@ from starlette.requests import Request
 
 from app.settings import GITHUB
 
+from datetime import  datetime, timedelta
+
 # Clé secrète pour signer le token JWT
 SECRET_KEY = "votre_clé_secrète"
 # Algorithme de signature JWT
@@ -41,8 +43,18 @@ async def github_callback(request: Request) -> Response:
         member_id = member.id
     access_token = secrets.token_hex(16)
     refresh_token = secrets.token_hex(16)
-    await register_token(access_token, refresh_token, member_id)
+    session = await get_session(member_id)
     token_data = {"user_id": member_id, "access_token": access_token, "refresh_token": refresh_token}
+    #verifiez si une session n'existe pas
+    if session is not None:
+        temps_date = timedelta(minutes=60)
+        if session.date_created + temps_date > datetime.now():
+            token_data = {"user_id": session.id_member, "access_token": session.token_session, "refresh_token": session.token_refresh}
+        else:
+            await delete_session(member_id)
+            await register_token(access_token, refresh_token, member_id)
+    else:
+        await register_token(access_token, refresh_token, member_id)
     token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
     # Redirigez l'utilisateur vers la page de profil
     url_response = f"http://localhost:5173/profil/{member_id}"

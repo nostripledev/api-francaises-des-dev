@@ -2,8 +2,8 @@ from collections import namedtuple
 
 from fastapi import UploadFile
 
-from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, MemberHasCategoryIn, \
-    GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut
+from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, \
+    GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut, Session
 
 from app import settings
 import mysql.connector
@@ -300,5 +300,34 @@ async def register_token(access_token: str, refresh_token: str, id_user: int):
         mydb.commit()
     except mysql.connector.Error:
         return "Error SQL : the request was unsuccessfully..."
+    cursor.close()
+    return None
+
+
+async def get_session(id_user: int):
+    session_record = namedtuple("Session",["token_refresh","id_member","token_session","date_created"])
+    cursor = mydb.cursor()
+    query = "SELECT * FROM session WHERE id_member = %(id_member)s"
+    try:
+        cursor.execute(query, {'id_member': id_user})
+        result = cursor.fetchone()
+        cursor.close()
+        if not result:
+            return None
+        else:
+            session = session_record._make(result)
+            return session
+    except mysql.connector.Error:
+        return None
+
+
+async def delete_session(id_user: int):
+    cursor = mydb.cursor()
+    query = "DELETE FROM session WHERE id_member = %(id_member)s"
+    try:
+        cursor.execute(query, {"id_member": id_user})
+        mydb.commit()
+    except mysql.connector.Error:
+        return "Error SQL"
     cursor.close()
     return None
