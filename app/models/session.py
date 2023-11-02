@@ -2,9 +2,12 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class Session(BaseModel):
-    token_refresh = str
+class SessionCookie(BaseModel):
+    access_token = str
     id_member = int
-    token_session = str
+    refresh_token = str
+
+
+class Session(SessionCookie):
     date_created = datetime
 

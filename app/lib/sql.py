@@ -3,9 +3,11 @@ from collections import namedtuple
 from fastapi import UploadFile
 
 from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, \
-    GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut, Session
+    GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut, Session, \
+    SessionCookie
 
 from app import settings
+from datetime import datetime, timedelta
 import mysql.connector
 
 from app.models.member_has_category import MemberHasCategoryOut
@@ -305,7 +307,7 @@ async def register_token(access_token: str, refresh_token: str, id_user: int):
 
 
 async def get_session(id_user: int):
-    session_record = namedtuple("Session",["token_refresh","id_member","token_session","date_created"])
+    session_record = namedtuple("Session",["access_token","refresh_token","id_member","date_created"])
     cursor = mydb.cursor()
     query = "SELECT * FROM session WHERE id_member = %(id_member)s"
     try:
@@ -331,3 +333,28 @@ async def delete_session(id_user: int):
         return "Error SQL"
     cursor.close()
     return None
+
+
+async def verif_session(session: Session):
+    cursor = mydb.cursor()
+    session_record = namedtuple("Session", ["access_token", "refresh_token", "id_member","date_created"])
+    query = "SELECT * FROM session WHERE id_member = %(id_member)s"
+    try:
+        cursor.execute(query, {'id_member': session["user_id"]})
+        result = cursor.fetchone()
+        cursor.close()
+        if not result:
+            return None
+        else:
+            session_verif = session_record._make(result)
+            print(session_verif)
+            if session_verif.access_token == session["access_token"] and session_verif.refresh_token == session["refresh_token"]:
+                temps_date = timedelta(minutes=60)
+                if session_verif.date_created + temps_date > datetime.now():
+                    return True
+                else:
+                    return None
+            else:
+                return None
+    except mysql.connector.Error:
+        return None

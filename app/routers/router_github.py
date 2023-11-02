@@ -10,7 +10,7 @@ from starlette.requests import Request
 
 from app.settings import GITHUB
 
-from datetime import  datetime, timedelta
+from datetime import datetime, timedelta
 
 from app import settings
 
@@ -19,7 +19,6 @@ router = APIRouter(
     tags=["github"]
 )
 
-ALGORITHM = settings.ALGORITHM
 SECRET_KEY = settings.SECRET_KEY
 
 github_sso = GithubSSO(GITHUB["client_id"], GITHUB["client_secret"], f"{GITHUB['callback_uri']}/github/callback")
@@ -48,16 +47,19 @@ async def github_callback(request: Request) -> Response:
     if session is not None:
         temps_date = timedelta(minutes=60)
         if session.date_created + temps_date > datetime.now():
-            token_data = {"user_id": session.id_member, "access_token": session.token_session, "refresh_token": session.token_refresh}
+            token_data = {"user_id": session.id_member, "access_token": session.access_token, "refresh_token": session.refresh_token}
         else:
             await delete_session(member_id)
             await register_token(access_token, refresh_token, member_id)
     else:
         await register_token(access_token, refresh_token, member_id)
-    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+    print(token_data)
+    token = jwt.encode(token_data, SECRET_KEY, algorithm=settings.ALGORITHM)
+    token_bis = {"id_member": member_id}
     # Redirigez l'utilisateur vers la page de profil
-    url_response = f"http://localhost:5173/profil/{member_id}"
+    url_response = f"http://127.0.0.1:5173/profil/{member_id}"
     response = RedirectResponse(url=url_response)
     # Créez un cookie HTTP avec le token
     response.set_cookie(key="access_token", value=token, httponly=True)
+    response.set_cookie(key="token_user", value=token_bis, httponly=False)
     return response
