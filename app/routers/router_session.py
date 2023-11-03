@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import json
-
 import jwt
 from fastapi import APIRouter
 from starlette.requests import Request
-from starlette.responses import RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from app.lib.sql import verif_session, delete_session
 
@@ -37,8 +35,8 @@ async def api_is_connected(request: Request, id_member: int):
 
 
 @router.delete("/delete")
-async def api_delete_session(id_member: int):
-    await delete_session(id_member)
-    url_response = "http://127.0.0.1:5137/"
-    response = RedirectResponse(url=url_response)
-    return response
+async def api_delete_session(id_member: str):
+    print(id_member)
+    id_user = int(id_member)
+    await delete_session(id_user)
+    return RedirectResponse("http://127.0.0.1:5173/")
