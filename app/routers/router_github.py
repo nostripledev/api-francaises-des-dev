@@ -1,3 +1,4 @@
+import json
 import secrets
 
 import jwt
@@ -53,13 +54,12 @@ async def github_callback(request: Request) -> Response:
             await register_token(access_token, refresh_token, member_id)
     else:
         await register_token(access_token, refresh_token, member_id)
-    print(token_data)
     token = jwt.encode(token_data, SECRET_KEY, algorithm=settings.ALGORITHM)
-    token_bis = {"id_member": member_id}
+    token_bis = member_id
     # Redirigez l'utilisateur vers la page de profil
     url_response = f"http://127.0.0.1:5173/profil/{member_id}"
     response = RedirectResponse(url=url_response)
     # Créez un cookie HTTP avec le token
-    response.set_cookie(key="access_token", value=token, httponly=True)
-    response.set_cookie(key="token_user", value=token_bis, httponly=False)
+    response.set_cookie(key='access_token', value=token, httponly=True)
+    response.set_cookie(key='token_user', value=token_bis, httponly=False)
     return response
