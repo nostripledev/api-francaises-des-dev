@@ -7,6 +7,7 @@ from app.lib.function import verifIsPngAndJpeg
 from app.lib.sql import *
 from app.models import *
 from app.models.member_has_category import MemberHasCategoryOut
+from app.auth.auth import *
 
 router = APIRouter(
     prefix="/member",
@@ -28,7 +29,7 @@ async def api_get_member_by_id(id: int):
 
 
 @router.patch("/")
-async def api_patch_member_update(member: MemberOut):
+async def api_patch_member_update(member: MemberOut, current_user: dict = Depends(get_current_user)):
     result = await patch_member_update(member)
     if result is not None:
         return Response(status_code=400)
@@ -36,7 +37,7 @@ async def api_patch_member_update(member: MemberOut):
 
 
 @router.patch("/image_portfolio")
-async def api_add_image_portfolio(file: UploadFile, id_member: int):
+async def api_add_image_portfolio(file: UploadFile, id_member: int, current_user: dict = Depends(get_current_user)):
     if file.size > 200 * 10000:
         return Response(status_code=413)
     if file.content_type not in ['image/jpeg', 'image/png']:
@@ -55,7 +56,7 @@ async def api_get_image_portfolio_by_id_member(id_member: int):
 
 
 @router.post("/category")
-async def api_post_add_category_on_member(member: MemberHasCategory):
+async def api_post_add_category_on_member(member: MemberHasCategory, current_user: dict = Depends(get_current_user)):
     category = await post_add_category_on_member(member)
     if category is not None:
         return Response(status_code=400)
@@ -73,7 +74,7 @@ async def api_get_member_has_category_by_id_member(id: int):
 
 
 @router.delete("/category")
-async def api_delete_category_delete_by_member(member: MemberHasCategory):
+async def api_delete_category_delete_by_member(member: MemberHasCategory, current_user: dict = Depends(get_current_user)):
     verif = await delete_category_delete_by_member(member)
     if verif is not None:
         return Response(status_code=400)
@@ -94,7 +95,7 @@ async def api_get_network_of_member(id: int):
 
 
 @router.post("/network")
-async def api_post_network_on_member(member: MemberHasNetwork):
+async def api_post_network_on_member(member: MemberHasNetwork, current_user: dict = Depends(get_current_user)):
     networks = await post_network_on_member(member)
     if networks is not None:
         return Response(status_code=400)
@@ -102,7 +103,7 @@ async def api_post_network_on_member(member: MemberHasNetwork):
 
 
 @router.delete("/network")
-async def api_delete_network_delete_by_member(member: MemberHasNetworkIn):
+async def api_delete_network_delete_by_member(member: MemberHasNetworkIn, current_user: dict = Depends(get_current_user)):
     verif = await delete_network_delete_by_member(member)
     if verif is not None:
         return Response(status_code=400)

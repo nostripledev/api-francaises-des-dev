@@ -5,6 +5,7 @@ from starlette.responses import Response
 
 from app.lib.sql import *
 from app.models import *
+from app.auth.auth import *
 
 router = APIRouter(
     prefix="/category",
@@ -18,7 +19,7 @@ async def api_get_categories():
 
 
 @router.post("/")
-async def api_post_category(category: CategoryOut):
+async def api_post_category(category: CategoryOut, current_user: dict = Depends(get_current_user)):
     result = await post_category(category)
     if result is not None:
         return Response(status_code=400)

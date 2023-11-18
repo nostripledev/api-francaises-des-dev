@@ -6,6 +6,7 @@ from starlette.requests import Request
 from fastapi.responses import RedirectResponse
 
 from app.lib.sql import verif_session, delete_session
+from app.auth.auth import *
 
 from app.settings import SECRET_KEY, ALGORITHM
 
@@ -35,8 +36,7 @@ async def api_is_connected(request: Request, id_member: int):
 
 
 @router.delete("/delete")
-async def api_delete_session(id_member: str):
-    print(id_member)
+async def api_delete_session(id_member: str, current_user: dict = Depends(get_current_user)):
     id_user = int(id_member)
     await delete_session(id_user)
     return RedirectResponse("http://127.0.0.1:5173/")
