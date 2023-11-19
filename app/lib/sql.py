@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 from fastapi import UploadFile
+from starlette.responses import Response
 
 from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, \
     GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut, Session, \
@@ -238,6 +239,19 @@ async def delete_network_delete_by_member(member: MemberHasNetworkIn):
     return None
 
 
+async def add_new_network(name_category: str):
+    cursor = mydb.cursor()
+    sql = "INSERT network (name) VALUES (%s)"
+    try:
+        cursor.execute(sql, name_category)
+        mydb.commit()
+    except mysql.connector.Error:
+        cursor.close()
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return True
+
+
 async def add_image_portfolio(file: UploadFile, id_member: int):
     cursor = mydb.cursor()
     sql = "UPDATE member SET image_portfolio = %s WHERE id = %s"
@@ -358,3 +372,66 @@ async def verif_session(session: Session):
                 return None
     except mysql.connector.Error:
         return None
+
+
+async def is_admin(id_user: int):
+    cursor = mydb.cursor()
+    query = "SELECT is_admin FROM member WHERE id_member = %(id_member)s"
+    try:
+        cursor.execute(query, {'id_member': id_user})
+        result = cursor.fetchone()
+        cursor.close()
+        if result == 1:
+            return True
+        else:
+            return False
+    except mysql.connector.Error:
+        return False
+
+
+async def delete_category(name: str):
+    cursor = mydb.cursor()
+    sql = "DELETE FROM category WHERE name = %s"
+    try:
+        cursor.execute(sql, name)
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL : the request was unsuccessful..."
+    cursor.close()
+    return None
+
+
+async def delete_network(name: str):
+    cursor = mydb.cursor()
+    sql = "DELETE FROM network WHERE name = %s"
+    try:
+        cursor.execute(sql, name)
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL : the request was unsuccessful..."
+    cursor.close()
+    return None
+
+
+async def validate_member(id_member: int):
+    cursor = mydb.cursor()
+    sql = "UPDATE member SET date_validate = NOW() WHERE id = %s"
+    try:
+        cursor.execute(sql, f"{id_member}")
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
+        
+
+async def ban_member(id_member: int):
+    cursor = mydb.cursor()
+    sql = "UPDATE member SET date_deleted = NOW() WHERE id = %s"
+    try:
+        cursor.execute(sql, f"{id_member}")
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None

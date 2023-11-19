@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import jwt
-from fastapi import APIRouter
-from starlette.requests import Request
+from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 
-from app.lib.sql import verif_session, delete_session
+from app.lib.sql import delete_session
 from app.auth.auth import *
 
 from app.settings import SECRET_KEY, ALGORITHM

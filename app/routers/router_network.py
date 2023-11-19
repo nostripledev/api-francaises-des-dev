@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Depends
 
+from app.auth import get_current_user, get_is_admin
 from app.lib.sql import *
 from typing import List
 
