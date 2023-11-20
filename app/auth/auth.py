@@ -28,11 +28,8 @@ async def get_is_admin(request: Request):
         token_user = request.cookies.get("token_user")
         token_user = int(token_user)
         cookie_session_decode = jwt.decode(access_token, SECRET_KEY, ALGORITHM)
-        if (
-            cookie_session_decode["user_id"] == token_user
-            and await is_admin(token_user)
-        ):
-            return cookie_session_decode
+        if (cookie_session_decode["user_id"] == token_user and await is_admin(token_user)):
+            return True
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
     except Exception as e:

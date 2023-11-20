@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.post("/category")
-async def api_post_category(category: CategoryOut, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
+async def api_post_category(category: CategoryOut, is_admin_user: bool = Depends(get_is_admin)):
     result = await post_category(category)
     if result is not None:
         return Response(status_code=400)

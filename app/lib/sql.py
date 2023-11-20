@@ -376,12 +376,12 @@ async def verif_session(session: Session):
 
 async def is_admin(id_user: int):
     cursor = mydb.cursor()
-    query = "SELECT is_admin FROM member WHERE id_member = %(id_member)s"
+    query = "SELECT is_admin FROM member WHERE id = %(id)s"
     try:
-        cursor.execute(query, {'id_member': id_user})
+        cursor.execute(query, {"id": id_user})
         result = cursor.fetchone()
         cursor.close()
-        if result == 1:
+        if result and result[0] == 1:
             return True
         else:
             return False
@@ -391,9 +391,9 @@ async def is_admin(id_user: int):
 
 async def delete_category(name: str):
     cursor = mydb.cursor()
-    sql = "DELETE FROM category WHERE name = %s"
+    sql = "DELETE FROM category WHERE name = %(name)s"
     try:
-        cursor.execute(sql, name)
+        cursor.execute(sql, {"name": name})
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL : the request was unsuccessful..."
@@ -403,9 +403,9 @@ async def delete_category(name: str):
 
 async def delete_network(name: str):
     cursor = mydb.cursor()
-    sql = "DELETE FROM network WHERE name = %s"
+    sql = "DELETE FROM network WHERE name = %(name)s"
     try:
-        cursor.execute(sql, name)
+        cursor.execute(sql, {"name": name})
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL : the request was unsuccessful..."

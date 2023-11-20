@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import *
-from .routers import router_session
 
 app = FastAPI()
 
@@ -30,3 +29,4 @@ app.include_router(router_member.router)
 app.include_router(router_category.router)
 app.include_router(router_network.router)
 app.include_router(router_session.router)
+app.include_router(router_admin.router)
