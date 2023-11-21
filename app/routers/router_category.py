@@ -1,11 +1,9 @@
 from typing import List
 
 from fastapi import APIRouter
-from starlette.responses import Response
 
 from app.lib.sql import *
 from app.models import *
-from app.auth.auth import *
 
 router = APIRouter(
     prefix="/category",

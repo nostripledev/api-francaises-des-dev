@@ -22,8 +22,8 @@ async def api_post_category(category: CategoryOut, is_admin_user: bool = Depends
 
 
 @router.post("/network")
-async def api_post_network(name_category: str, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
-    if await add_new_network(name_category):
+async def api_post_network(name_network: NetworkOut, is_admin_user: bool = Depends(get_is_admin)):
+    if await add_new_network(name_network):
         return Response(status_code=201)
     return Response(status_code=400)
 
@@ -36,7 +36,7 @@ async def api_delete_category(name: str, current_user: dict = Depends(get_curren
 
 
 @router.delete("/network")
-async def api_delete_network(name: str, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
+async def api_delete_network(name: str, is_admin_user: bool = Depends(get_is_admin)):
     if await delete_network(name) is not None:
         return Response(status_code=400)
     return Response(status_code=200)

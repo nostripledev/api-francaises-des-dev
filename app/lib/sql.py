@@ -1,11 +1,8 @@
 from collections import namedtuple
 
 from fastapi import UploadFile
-from starlette.responses import Response
 
-from app.models import GetMembers, MemberIn, Category, CategoryOut, MemberWithCategory, \
-    GetMemberHasNetwork, Network, MemberHasNetwork, MemberHasCategory, MemberHasNetworkIn, MemberOut, Session, \
-    SessionCookie
+from app.models import *
 
 from app import settings
 from datetime import datetime, timedelta
@@ -239,11 +236,12 @@ async def delete_network_delete_by_member(member: MemberHasNetworkIn):
     return None
 
 
-async def add_new_network(name_category: str):
+async def add_new_network(name: NetworkOut):
     cursor = mydb.cursor()
-    sql = "INSERT network (name) VALUES (%s)"
+    sql = "INSERT INTO network (name) VALUES (%s)"
+    val = [name.name]
     try:
-        cursor.execute(sql, name_category)
+        cursor.execute(sql, val)
         mydb.commit()
     except mysql.connector.Error:
         cursor.close()
@@ -389,7 +387,21 @@ async def is_admin(id_user: int):
         return False
 
 
+async def delete_table_member_has_category(name: str):
+    cursor = mydb.cursor()
+    sql = "DELETE FROM member_has_category WHERE id_category = (" \
+          "SELECT id_category FROM category WHERE name = %(name)s)"
+    try:
+        cursor.execute(sql, {"name": name})
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL : ..."
+    cursor.close()
+    return None
+
+
 async def delete_category(name: str):
+    await delete_table_member_has_category(name)
     cursor = mydb.cursor()
     sql = "DELETE FROM category WHERE name = %(name)s"
     try:
@@ -401,7 +413,21 @@ async def delete_category(name: str):
     return None
 
 
+async def delete_table_member_has_network(name: str):
+    cursor = mydb.cursor()
+    sql = "DELETE FROM member_has_network WHERE id_network = (" \
+          "SELECT id_network FROM network WHERE name = %(name)s)"
+    try:
+        cursor.execute(sql, {"name": name})
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL : ..."
+    cursor.close()
+    return None
+
+
 async def delete_network(name: str):
+    await delete_table_member_has_network(name)
     cursor = mydb.cursor()
     sql = "DELETE FROM network WHERE name = %(name)s"
     try:

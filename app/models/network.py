@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 
 
-class Network(BaseModel):
-    id: int
+class NetworkOut(BaseModel):
     name: str
+
+
+class Network(NetworkOut):
+    id: int
