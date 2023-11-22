@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import Optional, List
 
 from fastapi import UploadFile
 
@@ -390,7 +391,7 @@ async def is_admin(id_user: int):
 async def delete_table_member_has_category(name: str):
     cursor = mydb.cursor()
     sql = "DELETE FROM member_has_category WHERE id_category = (" \
-          "SELECT id_category FROM category WHERE name = %(name)s)"
+          "SELECT id FROM category WHERE name = %(name)s)"
     try:
         cursor.execute(sql, {"name": name})
         mydb.commit()
@@ -416,7 +417,7 @@ async def delete_category(name: str):
 async def delete_table_member_has_network(name: str):
     cursor = mydb.cursor()
     sql = "DELETE FROM member_has_network WHERE id_network = (" \
-          "SELECT id_network FROM network WHERE name = %(name)s)"
+          "SELECT id FROM network WHERE name = %(name)s)"
     try:
         cursor.execute(sql, {"name": name})
         mydb.commit()
@@ -437,6 +438,13 @@ async def delete_network(name: str):
         return "ErrorSQL : the request was unsuccessful..."
     cursor.close()
     return None
+
+
+async def get_all_member_admin() -> List[MemberOut]:
+    with mydb.cursor(named_tuple=True) as cursor:
+        cursor.execute("SELECT id, username, firstname, lastname, description, mail, url_portfolio, date_validate, "
+                       "date_deleted FROM member")
+        return [MemberOut(id=member.id, username=member.username, firstname=member.firstname, lastname=member.lastname, description=member.description, mail=member.mail, url_portfolio=member.url_portfolio, date_activated=member.date_validate, date_deleted=member.date_deleted) for member in cursor.fetchall()]
 
 
 async def validate_member(id_member: int):

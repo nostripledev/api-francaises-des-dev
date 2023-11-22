@@ -13,6 +13,11 @@ router = APIRouter(
 )
 
 
+@router.get("/member", response_model=List[MemberOut])
+async def api_get_member_all(is_admin_user: bool = Depends(get_is_admin)):
+    return await get_all_member_admin()
+
+
 @router.post("/category")
 async def api_post_category(category: CategoryOut, is_admin_user: bool = Depends(get_is_admin)):
     result = await post_category(category)
