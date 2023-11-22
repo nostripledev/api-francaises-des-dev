@@ -449,9 +449,9 @@ async def get_all_member_admin() -> List[MemberOut]:
 
 async def validate_member(id_member: int):
     cursor = mydb.cursor()
-    sql = "UPDATE member SET date_validate = NOW() WHERE id = %s"
+    sql = "UPDATE member SET date_validate = NOW() WHERE id = %(id)s"
     try:
-        cursor.execute(sql, f"{id_member}")
+        cursor.execute(sql, {"id": id_member})
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."
@@ -461,9 +461,21 @@ async def validate_member(id_member: int):
 
 async def ban_member(id_member: int):
     cursor = mydb.cursor()
-    sql = "UPDATE member SET date_deleted = NOW() WHERE id = %s"
+    sql = "UPDATE member SET date_deleted = NOW() WHERE id = %(id)s"
     try:
-        cursor.execute(sql, f"{id_member}")
+        cursor.execute(sql, {"id": id_member})
+        mydb.commit()
+    except mysql.connector.Error:
+        return "ErrorSQL: the request was unsuccessful..."
+    cursor.close()
+    return None
+
+
+async def unban_member(id_member: int):
+    cursor = mydb.cursor()
+    sql = "UPDATE member SET date_deleted = null WHERE id = %(id)s"
+    try:
+        cursor.execute(sql, {"id": id_member})
         mydb.commit()
     except mysql.connector.Error:
         return "ErrorSQL: the request was unsuccessful..."

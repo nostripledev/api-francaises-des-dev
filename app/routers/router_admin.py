@@ -13,6 +13,11 @@ router = APIRouter(
 )
 
 
+@router.get("/")
+async def api_is_admin(is_admin_user: bool = Depends(get_is_admin)):
+    return Response(status_code=200)
+
+
 @router.get("/member", response_model=List[MemberOut])
 async def api_get_member_all(is_admin_user: bool = Depends(get_is_admin)):
     return await get_all_member_admin()
@@ -48,14 +53,21 @@ async def api_delete_network(name: str, is_admin_user: bool = Depends(get_is_adm
 
 
 @router.patch("/member/validate")
-async def api_validate_member(id_member: int, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
-    if await validate_member(id_member) is not None:
+async def api_validate_member(id_member: str, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
+    if await validate_member(int(id_member)) is not None:
         return Response(status_code=400)
     return Response(status_code=200)
 
 
 @router.patch("/member/ban")
-async def api_ban_member(id_member: int, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
-    if await ban_member(id_member) is not None:
+async def api_ban_member(id_member: str, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
+    if await ban_member(int(id_member)) is not None:
+        return Response(status_code=400)
+    return Response(status_code=200)
+
+
+@router.patch("/member/unban")
+async def api_ban_member(id_member: str, current_user: dict = Depends(get_current_user), is_admin_user: bool = Depends(get_is_admin)):
+    if await unban_member(int(id_member)) is not None:
         return Response(status_code=400)
     return Response(status_code=200)
