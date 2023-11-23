@@ -29,6 +29,7 @@ CREATE TABLE `member` (
   `date_validate` datetime DEFAULT NULL,
   `date_deleted` datetime DEFAULT NULL,
   `url_portfolio` varchar(320) DEFAULT NULL,
+  `is_admin` int(1) default 0,
   `image_portfolio` longblob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
